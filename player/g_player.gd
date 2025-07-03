@@ -6,14 +6,15 @@ enum State {
 	WALK,
 }
 
-const BASE_SPEED := 75.0
+const BASE_SPEED := 80.0
 
 var input := Vector2.ZERO
 var state := State.IDLE
 
 var speed := BASE_SPEED
 
-@onready var sprite = $Visual/Sprite2D
+@onready var sprite := $Visual/Sprite2D as Sprite2D
+@onready var animator := $Visual/Animator as AnimationPlayer
 
 func _unhandled_input(_event: InputEvent) -> void:
 	input = Input.get_vector(&"left", &"right", &"up", &"down")
@@ -45,7 +46,7 @@ func _change_state(to: State) -> void:
 	state = to
 
 func _enter_idle() -> void:
-	pass
+	animator.play(&"Idle")
 
 func _process_idle(_delta: float) -> void:
 	if input:
@@ -56,11 +57,12 @@ func _exit_idle() -> void:
 	pass
 
 func _enter_walk() -> void:
-	pass
+	animator.play(&"Walk")
 
 func _process_walk(_delta: float) -> void:
 	if input:
 		velocity = input * speed
+		_do_flip_sprite()
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, speed)
 
@@ -69,3 +71,9 @@ func _process_walk(_delta: float) -> void:
 
 func _exit_walk() -> void:
 	pass
+
+func _do_flip_sprite() -> void:
+	if input.x > 0.0:
+		sprite.flip_h = false
+	elif input.x < 0.0:
+		sprite.flip_h = true
